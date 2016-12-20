@@ -24,6 +24,13 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
     const CHECK_INDENTATION = false;
 
     /**
+     * Adaptation for the SOL project: allow that a typehint only exists in the PHPDOC.
+     *
+     * @var bool
+     */
+    const ALLOW_ONLY_TYPEHINTING_IN_PHPDOC = true;
+
+    /**
      * The current PHP version.
      *
      * @var integer
@@ -433,22 +440,24 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
                     $suggestedTypeHint = substr($suggestedTypeHint, (strlen($typeHint) * -1));
 
                     if ($typeHint === '') {
-                        $error = 'Type hint "%s" missing for %s';
-                        $data  = [
-                            $suggestedTypeHint,
-                            $param['var'],
-                        ];
+                        if (!self::ALLOW_ONLY_TYPEHINTING_IN_PHPDOC) {
+                            $error = 'Type hint "%s" missing for %s';
+                            $data = [
+                                $suggestedTypeHint,
+                                $param['var'],
+                            ];
 
-                        $errorCode = 'TypeHintMissing';
-                        if ($suggestedTypeHint === 'string'
-                            || $suggestedTypeHint === 'int'
-                            || $suggestedTypeHint === 'float'
-                            || $suggestedTypeHint === 'bool'
-                        ) {
-                            $errorCode = 'Scalar'.$errorCode;
+                            $errorCode = 'TypeHintMissing';
+                            if ($suggestedTypeHint === 'string'
+                                || $suggestedTypeHint === 'int'
+                                || $suggestedTypeHint === 'float'
+                                || $suggestedTypeHint === 'bool'
+                            ) {
+                                $errorCode = 'Scalar' . $errorCode;
+                            }
+
+                            $phpcsFile->addError($error, $stackPtr, $errorCode, $data);
                         }
-
-                        $phpcsFile->addError($error, $stackPtr, $errorCode, $data);
                     } else if ($typeHint !== $suggestedTypeHint && $typeHint !== '?'.$suggestedTypeHint) {
                         $error = 'Expected type hint "%s"; found "%s" for %s';
                         $data  = [
