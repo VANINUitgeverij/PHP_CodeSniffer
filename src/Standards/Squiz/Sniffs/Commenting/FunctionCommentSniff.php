@@ -16,6 +16,12 @@ use PHP_CodeSniffer\Util\Common;
 
 class FunctionCommentSniff extends PEARFunctionCommentSniff
 {
+    /**
+     * Adaptation for the SOL project: don't check indents.
+     *
+     * @var bool
+     */
+    const CHECK_INDENTATION = false;
 
     /**
      * The current PHP version.
@@ -576,6 +582,10 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
      */
     protected function checkSpacingAfterParamType(File $phpcsFile, $param, $maxType, $spacing=1)
     {
+        if (!self::CHECK_INDENTATION) {
+            return;
+        }
+
         // Check number of spaces after the type.
         $spaces = ($maxType - strlen($param['type']) + $spacing);
         if ($param['type_space'] !== $spaces) {
@@ -631,6 +641,10 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
      */
     protected function checkSpacingAfterParamName(File $phpcsFile, $param, $maxVar, $spacing=1)
     {
+        if (!self::CHECK_INDENTATION) {
+            return;
+        }
+
         // Check number of spaces after the var name.
         $spaces = ($maxVar - strlen($param['var']) + $spacing);
         if ($param['var_space'] !== $spaces) {
