@@ -31,6 +31,12 @@ if (class_exists('PEAR_Sniffs_Commenting_FunctionCommentSniff', true) === false)
  */
 class Squiz_Sniffs_Commenting_FunctionCommentSniff extends PEAR_Sniffs_Commenting_FunctionCommentSniff
 {
+    /**
+     * Adaptation for the SOL project: don't check indents.
+     *
+     * @var bool
+     */
+    const CHECK_INDENTATION = false;
 
     /**
      * The current PHP version.
@@ -459,40 +465,42 @@ class Squiz_Sniffs_Commenting_FunctionCommentSniff extends PEAR_Sniffs_Commentin
             // Check number of spaces after the type.
             $spaces = ($maxType - strlen($param['type']) + 1);
             if ($param['type_space'] !== $spaces) {
-                $error = 'Expected %s spaces after parameter type; %s found';
-                $data  = array(
-                          $spaces,
-                          $param['type_space'],
-                         );
+                if (self::CHECK_INDENTATION) {
+                    $error = 'Expected %s spaces after parameter type; %s found';
+                    $data = array(
+                        $spaces,
+                        $param['type_space'],
+                    );
 
-                $fix = $phpcsFile->addFixableError($error, $param['tag'], 'SpacingAfterParamType', $data);
-                if ($fix === true) {
-                    $phpcsFile->fixer->beginChangeset();
+                    $fix = $phpcsFile->addFixableError($error, $param['tag'], 'SpacingAfterParamType', $data);
+                    if ($fix === true) {
+                        $phpcsFile->fixer->beginChangeset();
 
-                    $content  = $param['type'];
-                    $content .= str_repeat(' ', $spaces);
-                    $content .= $param['var'];
-                    $content .= str_repeat(' ', $param['var_space']);
-                    $content .= $param['commentLines'][0]['comment'];
-                    $phpcsFile->fixer->replaceToken(($param['tag'] + 2), $content);
+                        $content = $param['type'];
+                        $content .= str_repeat(' ', $spaces);
+                        $content .= $param['var'];
+                        $content .= str_repeat(' ', $param['var_space']);
+                        $content .= $param['commentLines'][0]['comment'];
+                        $phpcsFile->fixer->replaceToken(($param['tag'] + 2), $content);
 
-                    // Fix up the indent of additional comment lines.
-                    foreach ($param['commentLines'] as $lineNum => $line) {
-                        if ($lineNum === 0
-                            || $param['commentLines'][$lineNum]['indent'] === 0
-                        ) {
-                            continue;
+                        // Fix up the indent of additional comment lines.
+                        foreach ($param['commentLines'] as $lineNum => $line) {
+                            if ($lineNum === 0
+                                || $param['commentLines'][$lineNum]['indent'] === 0
+                            ) {
+                                continue;
+                            }
+
+                            $newIndent = ($param['commentLines'][$lineNum]['indent'] + $spaces - $param['type_space']);
+                            $phpcsFile->fixer->replaceToken(
+                                ($param['commentLines'][$lineNum]['token'] - 1),
+                                str_repeat(' ', $newIndent)
+                            );
                         }
 
-                        $newIndent = ($param['commentLines'][$lineNum]['indent'] + $spaces - $param['type_space']);
-                        $phpcsFile->fixer->replaceToken(
-                            ($param['commentLines'][$lineNum]['token'] - 1),
-                            str_repeat(' ', $newIndent)
-                        );
-                    }
-
-                    $phpcsFile->fixer->endChangeset();
-                }//end if
+                        $phpcsFile->fixer->endChangeset();
+                    }//end if
+                }
             }//end if
 
             // Make sure the param name is correct.
@@ -528,40 +536,42 @@ class Squiz_Sniffs_Commenting_FunctionCommentSniff extends PEAR_Sniffs_Commentin
             // Check number of spaces after the var name.
             $spaces = ($maxVar - strlen($param['var']) + 1);
             if ($param['var_space'] !== $spaces) {
-                $error = 'Expected %s spaces after parameter name; %s found';
-                $data  = array(
-                          $spaces,
-                          $param['var_space'],
-                         );
+                if (self::CHECK_INDENTATION) {
+                    $error = 'Expected %s spaces after parameter name; %s found';
+                    $data = array(
+                        $spaces,
+                        $param['var_space'],
+                    );
 
-                $fix = $phpcsFile->addFixableError($error, $param['tag'], 'SpacingAfterParamName', $data);
-                if ($fix === true) {
-                    $phpcsFile->fixer->beginChangeset();
+                    $fix = $phpcsFile->addFixableError($error, $param['tag'], 'SpacingAfterParamName', $data);
+                    if ($fix === true) {
+                        $phpcsFile->fixer->beginChangeset();
 
-                    $content  = $param['type'];
-                    $content .= str_repeat(' ', $param['type_space']);
-                    $content .= $param['var'];
-                    $content .= str_repeat(' ', $spaces);
-                    $content .= $param['commentLines'][0]['comment'];
-                    $phpcsFile->fixer->replaceToken(($param['tag'] + 2), $content);
+                        $content = $param['type'];
+                        $content .= str_repeat(' ', $param['type_space']);
+                        $content .= $param['var'];
+                        $content .= str_repeat(' ', $spaces);
+                        $content .= $param['commentLines'][0]['comment'];
+                        $phpcsFile->fixer->replaceToken(($param['tag'] + 2), $content);
 
-                    // Fix up the indent of additional comment lines.
-                    foreach ($param['commentLines'] as $lineNum => $line) {
-                        if ($lineNum === 0
-                            || $param['commentLines'][$lineNum]['indent'] === 0
-                        ) {
-                            continue;
+                        // Fix up the indent of additional comment lines.
+                        foreach ($param['commentLines'] as $lineNum => $line) {
+                            if ($lineNum === 0
+                                || $param['commentLines'][$lineNum]['indent'] === 0
+                            ) {
+                                continue;
+                            }
+
+                            $newIndent = ($param['commentLines'][$lineNum]['indent'] + $spaces - $param['var_space']);
+                            $phpcsFile->fixer->replaceToken(
+                                ($param['commentLines'][$lineNum]['token'] - 1),
+                                str_repeat(' ', $newIndent)
+                            );
                         }
 
-                        $newIndent = ($param['commentLines'][$lineNum]['indent'] + $spaces - $param['var_space']);
-                        $phpcsFile->fixer->replaceToken(
-                            ($param['commentLines'][$lineNum]['token'] - 1),
-                            str_repeat(' ', $newIndent)
-                        );
-                    }
-
-                    $phpcsFile->fixer->endChangeset();
-                }//end if
+                        $phpcsFile->fixer->endChangeset();
+                    }//end if
+                }
             }//end if
 
             // Param comments must start with a capital letter and end with the full stop.
