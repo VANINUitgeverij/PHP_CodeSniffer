@@ -31,6 +31,12 @@ if (class_exists('PEAR_Sniffs_Commenting_FunctionCommentSniff', true) === false)
  */
 class Squiz_Sniffs_Commenting_FunctionCommentSniff extends PEAR_Sniffs_Commenting_FunctionCommentSniff
 {
+    /**
+     * Adaptation for the SOL project: don't check indents.
+     *
+     * @var bool
+     */
+    const CHECK_INDENTATION = false;
 
     /**
      * The current PHP version.
@@ -576,6 +582,10 @@ class Squiz_Sniffs_Commenting_FunctionCommentSniff extends PEAR_Sniffs_Commentin
      */
     protected function checkSpacingAfterParamType(PHP_CodeSniffer_File $phpcsFile, $param, $maxType, $spacing = 1)
     {
+        if (!self::CHECK_INDENTATION) {
+            return;
+        }
+
         // Check number of spaces after the type.
         $spaces = ($maxType - strlen($param['type']) + $spacing);
         if ($param['type_space'] !== $spaces) {
@@ -631,6 +641,10 @@ class Squiz_Sniffs_Commenting_FunctionCommentSniff extends PEAR_Sniffs_Commentin
      */
     protected function checkSpacingAfterParamName(PHP_CodeSniffer_File $phpcsFile, $param, $maxVar, $spacing = 1)
     {
+        if (!self::CHECK_INDENTATION) {
+            return;
+        }
+
         // Check number of spaces after the var name.
         $spaces = ($maxVar - strlen($param['var']) + $spacing);
         if ($param['var_space'] !== $spaces) {
