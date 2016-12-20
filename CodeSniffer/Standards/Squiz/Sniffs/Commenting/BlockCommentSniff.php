@@ -37,6 +37,13 @@ class Squiz_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
      */
     private $_tabWidth = null;
 
+    /**
+     * Adaptation for the SOL project: don't check indents.
+     *
+     * @var bool
+     */
+    const CHECK_INDENTATION = false;
+
 
     /**
      * Returns an array of tokens this test wants to listen for.
@@ -231,20 +238,21 @@ class Squiz_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
                          $expected,
                          $leadingSpace,
                         );
+                if (self::CHECK_INDENTATION) {
+                    $error = 'First line of comment not aligned correctly; expected %s but found %s';
+                    $fix = $phpcsFile->addFixableError($error, $commentLines[1], 'FirstLineIndent', $data);
+                    if ($fix === true) {
+                        if (isset($tokens[$commentLines[1]]['orig_content']) === true
+                            && $tokens[$commentLines[1]]['orig_content'][0] === "\t"
+                        ) {
+                            // Line is indented using tabs.
+                            $padding = str_repeat("\t", floor($starColumn / $this->_tabWidth));
+                        } else {
+                            $padding = str_repeat(' ', $starColumn);
+                        }
 
-                $error = 'First line of comment not aligned correctly; expected %s but found %s';
-                $fix   = $phpcsFile->addFixableError($error, $commentLines[1], 'FirstLineIndent', $data);
-                if ($fix === true) {
-                    if (isset($tokens[$commentLines[1]]['orig_content']) === true
-                        && $tokens[$commentLines[1]]['orig_content'][0] === "\t"
-                    ) {
-                        // Line is indented using tabs.
-                        $padding = str_repeat("\t", floor($starColumn / $this->_tabWidth));
-                    } else {
-                        $padding = str_repeat(' ', $starColumn);
+                        $phpcsFile->fixer->replaceToken($commentLines[1], $padding . ltrim($content));
                     }
-
-                    $phpcsFile->fixer->replaceToken($commentLines[1], $padding.ltrim($content));
                 }
             }//end if
 
@@ -282,20 +290,21 @@ class Squiz_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
                          $expected,
                          $leadingSpace,
                         );
+                if (self::CHECK_INDENTATION) {
+                    $error = 'Comment line indented incorrectly; expected at least %s but found %s';
+                    $fix = $phpcsFile->addFixableError($error, $line, 'LineIndent', $data);
+                    if ($fix === true) {
+                        if (isset($tokens[$line]['orig_content']) === true
+                            && $tokens[$line]['orig_content'][0] === "\t"
+                        ) {
+                            // Line is indented using tabs.
+                            $padding = str_repeat("\t", floor($starColumn / $this->_tabWidth));
+                        } else {
+                            $padding = str_repeat(' ', $starColumn);
+                        }
 
-                $error = 'Comment line indented incorrectly; expected at least %s but found %s';
-                $fix   = $phpcsFile->addFixableError($error, $line, 'LineIndent', $data);
-                if ($fix === true) {
-                    if (isset($tokens[$line]['orig_content']) === true
-                        && $tokens[$line]['orig_content'][0] === "\t"
-                    ) {
-                        // Line is indented using tabs.
-                        $padding = str_repeat("\t", floor($starColumn / $this->_tabWidth));
-                    } else {
-                        $padding = str_repeat(' ', $starColumn);
+                        $phpcsFile->fixer->replaceToken($line, $padding . ltrim($tokens[$line]['content']));
                     }
-
-                    $phpcsFile->fixer->replaceToken($line, $padding.ltrim($tokens[$line]['content']));
                 }
             }//end if
         }//end foreach
@@ -322,9 +331,10 @@ class Squiz_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
                          $expected,
                          $leadingSpace,
                         );
-
-                $error = 'Last line of comment aligned incorrectly; expected %s but found %s';
-                $phpcsFile->addError($error, $commentLines[$lastIndex], 'LastLineIndent', $data);
+                if (self::CHECK_INDENTATION) {
+                    $error = 'Last line of comment aligned incorrectly; expected %s but found %s';
+                    $phpcsFile->addError($error, $commentLines[$lastIndex], 'LastLineIndent', $data);
+                }
             }
         }//end if
 
