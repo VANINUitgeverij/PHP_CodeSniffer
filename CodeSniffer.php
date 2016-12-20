@@ -2111,14 +2111,14 @@ class PHP_CodeSniffer
             switch ($lowerVarType) {
             case 'bool':
             case 'boolean':
-                return 'boolean';
+                return 'bool';
             case 'double':
             case 'real':
             case 'float':
                 return 'float';
             case 'int':
             case 'integer':
-                return 'integer';
+                return 'int';
             case 'array()':
             case 'array':
                 return 'array';
