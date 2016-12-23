@@ -57,6 +57,7 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
         $isSpecialMethod = ($methodName === '__construct' || $methodName === '__destruct');
 
         $return = null;
+        $test = false;
         foreach ($tokens[$commentStart]['comment_tags'] as $tag) {
             if ($tokens[$tag]['content'] === '@return') {
                 if ($return !== null) {
@@ -66,6 +67,9 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
                 }
 
                 $return = $tag;
+            }
+            if ($tokens[$tag]['content'] === '@test') {
+                $test = true;
             }
         }
 
@@ -181,7 +185,7 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
                     }//end if
                 }//end if
             }//end if
-        } else {
+        } elseif (!$test) {
             $error = 'Missing @return tag in function comment';
             $phpcsFile->addError($error, $tokens[$commentStart]['comment_closer'], 'MissingReturn');
         }//end if
