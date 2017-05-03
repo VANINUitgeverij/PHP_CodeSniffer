@@ -44,6 +44,13 @@ class Squiz_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
      */
     const CHECK_INDENTATION = false;
 
+    /**
+     * Adaptation for the SOL project: allow single line block comments.
+     *
+     * @var bool
+     */
+    const ALLOW_SINGLE_LINE_BLOCK_COMMENT = true;
+
 
     /**
      * Returns an array of tokens this test wants to listen for.
@@ -178,6 +185,10 @@ class Squiz_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
         }
 
         if (count($commentLines) === 1) {
+            if (self::ALLOW_SINGLE_LINE_BLOCK_COMMENT) {
+                return;
+            }
+
             $error = 'Single line block comment not allowed; use inline ("// text") comment instead';
             $fix   = $phpcsFile->addFixableError($error, $stackPtr, 'SingleLine');
             if ($fix === true) {
