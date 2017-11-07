@@ -140,6 +140,12 @@ class LineLengthSniff implements Sniff
                 $nonBreakingLength = $tokens[$stackPtr]['length'];
 
                 $space = strrpos($tokens[$stackPtr]['content'], ' ');
+                // Addition for SOL: If the comment contains a function, don't require a split,
+                // because PhpStorm doesn't support it.
+                if (strrpos($tokens[$stackPtr]['content'], '(') !== false &&
+                    strrpos($tokens[$stackPtr]['content'], ')') !== false) {
+                    $space = false;
+                }
                 if ($space !== false) {
                     $nonBreakingLength -= ($space + 1);
                 }
